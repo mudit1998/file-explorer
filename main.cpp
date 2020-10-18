@@ -35,7 +35,7 @@ static int getch(void);
 static int kbhit(void);
 static int kbesc(void);
 static int kbget(void);
-
+//to change to non-canonical mode
 static int getch(void)
 {
     int c = 0;
@@ -109,7 +109,7 @@ static int kbget(void)
     return (c == KEY_ESCAPE) ? kbesc() : c;
 }
 
-vector<string> list_dir(char * path)
+vector<string> list_dir(char * path)// stores the list in a vector of string
 {
    vector<string>s;
    DIR * thedirectory;
@@ -128,12 +128,15 @@ vector<string> list_dir(char * path)
     closedir(thedirectory);
     return s;
 }
-void single_print(char * path)
+void single_print(char * path) // single print of a directory of file prsent in the directory
 {
   	 struct  stat sb;
   	 stat(path,&sb);
      string s=path;
-     cout<<s.substr(s.find_last_of("/\\")+1)<<setw(80);
+     char tmp[512];
+     string name=s.substr(s.find_last_of("/\\")+1);
+     strcpy(tmp,name.c_str());
+     printf("%-20s\t",tmp);
      switch (sb.st_mode & S_IFMT) 
      {
             case S_IFBLK:  printf("b "); break;
@@ -156,7 +159,7 @@ void single_print(char * path)
         printf( (sb.st_mode & S_IWOTH) ? "w" : "-");
         printf( (sb.st_mode & S_IXOTH) ? "x" : "-");
 
-       cout<<setw(50)<<sb.st_size<<setw(40)<<ctime(&sb.st_mtime);
+       cout<<setw(20)<<sb.st_size<<setw(40)<<ctime(&sb.st_mtime);
 }
  
  void display_dir(vector<string>s,int start,int end)
@@ -170,21 +173,26 @@ void single_print(char * path)
          single_print(path);
       }
  }
- void renameFile(vector<string>tokens){
- 	if(tokens.size()==3){
+ void renameFile(vector<string>tokens) // rename for file
+ {
+ 	if(tokens.size()==3)
+ 	{
        string initial=tokens[1];
        string later=tokens[2];
        rename(initial.c_str(),later.c_str());
  	}
- 	else{
+ 	else
+ 	{
  		cout<<endl;
 	    cout<<"\033[0;31m"<<"invalid arg"<<endl;
 	    cout<<"\033[0m";
 	    cout<<":";
  	}
  }
- void createNewFile(vector<string>tokens){
- 	if(tokens.size()!=3){
+ void createNewFile(vector<string>tokens)
+ {
+ 	if(tokens.size()!=3)
+ 	{
  		cout<<endl;
 	    cout<<"\033[0;31m"<<"less arg"<<endl;
 	    cout<<"\033[0m";
@@ -196,15 +204,18 @@ void single_print(char * path)
  	char * names=new char[name.length()+1];
  	strcpy(names,name.c_str());
  	int status=open(names,O_RDONLY | O_CREAT,S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH );
- 	if(status==-1){
+ 	if(status==-1)
+ 	{
  		cout<<endl;
 	    cout<<"\033[0;31m"<<"error in creating file"<<endl;
 	    cout<<"\033[0m";
 	    cout<<":";
  	}
  }
- void deleteFile(vector<string>tokens){
- 	if(tokens.size()!=2){
+ void deleteFile(vector<string>tokens)
+ {
+ 	if(tokens.size()!=2)
+ 	{
  		cout<<endl;
 	    cout<<"\033[0;31m"<<"invalid arg"<<endl;
 	    cout<<"\033[0m";
@@ -214,53 +225,63 @@ void single_print(char * path)
  	char * name=new char[tokens[1].length()+1];
  	strcpy(name,tokens[1].c_str());
     int status=remove(name);
-    if(status!=0){
+    if(status!=0)
+    {
     	cout<<endl;
 	    cout<<"\033[0;31m"<<"error in deleting file"<<endl;
 	    cout<<"\033[0m";
 	    cout<<":";
     }
  }
- void makeDirectory(vector<string>tokens){
- 	if(tokens.size()!=3){
+ void makeDirectory(vector<string>tokens)
+ {
+ 	if(tokens.size()!=3)
+ 	{
  		cout<<endl;
 	    cout<<"\033[0;31m"<<"invalid arg"<<endl;
 	    cout<<"\033[0m";
 	    cout<<":";
  	}
- 	else{
+ 	else
+ 	{
          string name=tokens[2];
          name=name+"/"+tokens[1];
          char * names=new char[name.length()+1];
          strcpy(names,name.c_str());
           int status= mkdir(names,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-          if(status==-1){
+          if(status==-1)
+          {
           	cout<<endl;
-	    cout<<"\033[0;31m"<<"error in creating directory"<<endl;
-	    cout<<"\033[0m";
-	    cout<<":";
+	        cout<<"\033[0;31m"<<"error in creating directory"<<endl;
+	        cout<<"\033[0m";
+	        cout<<":";
           }
- 	}
+    }
  }
 
- void removeDir(char * name){
+ void removeDir(char * name){ //recursively delete directory 
  	DIR *d;
  		struct dirent *dir;
  		d=opendir(name);
- 		if(d){
- 			while((dir=readdir(d))!=NULL){
+ 		if(d)
+ 		{
+ 			while((dir=readdir(d))!=NULL)
+ 			{
  				if((string(dir->d_name)=="..") || (string(dir->d_name)==".") ){}
- 				else{
+ 				else
+ 				{
  						string final =string(name)+"/"+string(dir->d_name);
  						char * finals=new char[final.length()+1];
  						strcpy(finals,final.c_str());
  						struct stat a;
  						if(stat(finals,&a)==-1)perror("lstat");
- 						else{
+ 						else
+ 						{
  							if(S_ISDIR(a.st_mode)){
                               removeDir(finals);
  							}
- 							else{
+ 							else
+ 							{
  								int status= remove(finals);
 	                            if(status != 0)
 	                            {
@@ -272,11 +293,8 @@ void single_print(char * path)
 	
  							}
  						}
-
-
-
- 					}
- 			}
+ 				}
+ 		    }
  			closedir(d);
  			int sta=rmdir(name);
  			if(sta==-1){
@@ -287,14 +305,14 @@ void single_print(char * path)
  			}
 
 
- 		}
+ 	    }
  		else{
  			cout<<endl;
 	            cout<<"\033[0;31m"<<"no dir exist"<<endl;
 	            cout<<"\033[0m";
 	            cout<<":";
  		}
- }
+  }
  void deleteDirectory(vector<string>tokens){
  	if(tokens.size()!=2){
  		cout<<endl;
@@ -302,7 +320,8 @@ void single_print(char * path)
 	    cout<<"\033[0m";
 	    cout<<":";
  	}
- 	else{
+ 	else
+ 	{
  		char * name=new char[tokens[1].length()+1];
  		strcpy(name,tokens[1].c_str());
  		removeDir(name);
@@ -338,16 +357,18 @@ void single_print(char * path)
 	    cout<<"\033[0;31m"<<"error in setting permission"<<endl;
 	    cout<<"\033[0m";
 	    cout<<":";
- }}
- void copy_dir(char * path,char* des){
+    }
+ }
+ void copy_dir(char * path,char* des)
+ {
  	int status= mkdir(des,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	 if( status==-1)
-	 {
+	{
 	 	cout<<endl;
 	    cout<<"\033[0;31m"<<"error in creating dir"<<endl;
 	    cout<<"\033[0m";
 	    cout<<":";
-	 }
+	}
 
 	DIR *d;
 	struct dirent *dir;
@@ -387,13 +408,14 @@ void single_print(char * path)
 		  	  }
 	    }
 	}
-	else{
-            cout<<endl;
+	else
+	{
+        cout<<endl;
 	    cout<<"\033[0;31m"<<"error in creating dir"<<endl;
 	    cout<<"\033[0m";
 	    cout<<":";		
 	}
-}
+ }
  
  void copycommand(vector<string>tokens){
  	int len=tokens.size();
@@ -403,7 +425,8 @@ void single_print(char * path)
 	    cout<<"\033[0m";
 	    cout<<":";
  	}
- 	else{
+ 	else
+ 	{
  		for(int i=1;i<len-1;i++)
 		{
 			string newData = tokens[i];
@@ -417,16 +440,16 @@ void single_print(char * path)
 			struct stat b;
 			stat(sor,&b);
 			if(S_ISDIR(b.st_mode)){
-				copy_dir(sor,dest);
+				copy_dir(sor,dest); // copy directory
 			}
 			else{
-				copy_file(sor,dest);
+				copy_file(sor,dest);//copy files
 			}
 
- 	}
+ 	    }
+    }
  }
-}
- void movecommand(vector<string>tokens){
+ void movecommand(vector<string>tokens){ // move the content by use of copy and remove
  	int len=tokens.size();
  	if(len<3){
  	   cout<<endl;
@@ -434,7 +457,8 @@ void single_print(char * path)
 	    cout<<"\033[0m";
 	    cout<<":";	
  	}
- 	else{
+ 	else
+ 	{
         for(int i=1;i<len-1;i++)
 		{			
 			string newData = tokens[i];
@@ -465,9 +489,10 @@ void single_print(char * path)
 	             cout<<":";
 				}
 			}
- 	}
- }}
- void gotos(vector<string>tokens){
+ 	    }
+    }
+ }
+ void gotos(vector<string>tokens){// goto to the directory which we want
  	if(tokens.size()!=2){
  		cout<<endl;
 	    cout<<"\033[0;31m"<<"error "<<endl;
@@ -486,7 +511,7 @@ void single_print(char * path)
  		}
  	}
  }
- int searchall(char * path,string filename){
+ int searchall(char * path,string filename){ // search recusively
 
 	DIR *d;
 	struct dirent *dir;
@@ -527,24 +552,28 @@ void single_print(char * path)
 					}
                 }
             }
-}return 0;
-}else{
-	return 0;
-}
-}
- void searchcommand(vector<string>tokens){
+        }return 0;
+    }else
+    {
+	     return 0;
+    }
+ }
+ void searchcommand(vector<string>tokens)
+ {
  	int len=tokens.size();
- 	if(len!=2){
+ 	if(len!=2)
+ 	{
  		cout<<endl;
 	    cout<<"\033[0;31m"<<"error "<<endl;
 	    cout<<"\033[0m";
 	    cout<<":";
  	}
- 	else{
+ 	else
+ 	{
  		string name=tokens[1];
  		char * path=new char[root.length()+1];
  		strcpy(path,root.c_str());
- 		cout<<searchall(path,name);
+ 		cout<<searchall(path,name);// return 1 if find otherwise 0
  	}
  }
  int command_mode(){
@@ -554,7 +583,7 @@ void single_print(char * path)
  		while(((ch = getchar())!= 10) && ch!=27)
 		{
 				input = input + ch;
-				cout<<ch;	
+				//cout<<ch;	
 	    }
 	    tokens.clear();
 
@@ -579,88 +608,104 @@ void single_print(char * path)
 	    i++;
 
       }
+      // stored the parser string into tokens (vector of string) and the check for the first string of vector which will be our command
        if(ch==10){
        	string command=tokens[0];
        	if(command == "copy")
 			{
 				copycommand(tokens);
+				//cout<<endl;
+				cout<<":";
 			}
 			else if(command == "move")
 			{
 				movecommand(tokens);
+				//	cout<<endl;
+				cout<<":";
 			}
 			else
 			 if(command == "rename")
 			{
 				renameFile(tokens);
+				//	cout<<endl;
+				cout<<":";
 			}
 			else if(command == "create_file")
 			{
 				createNewFile(tokens);
+				//	cout<<endl;
+				cout<<":";
 			}
 			else if(command == "create_dir")
 			{
 				makeDirectory(tokens);
+				cout<<":";
 			}
 			else if(command == "delete_file")
 			{
 				deleteFile(tokens);
+				cout<<":";
 			}
 			else if(command == "delete_dir")
 			{
 				deleteDirectory(tokens);
+				cout<<":";
 			}
 			else if(command=="goto"){
 				gotos(tokens);
+				cout<<":";
 			}
 			else if(command=="search"){
 				searchcommand(tokens);
+					cout<<endl;
+					cout<<":";
 			}
 			else{
 				cout<<"invalid"<<endl;
+				//cout<<":";
 			}
        } 
 
- 	}while(ch!=27);
+ 	}while(ch!=27); // used escape for exiting
 
   return 0;
  }
 
 int main()
 {
-long size;
-char *buf;
-char *ptr;
-int start=0;
-int end=20;
-size = pathconf(".", _PC_PATH_MAX);
+  long size;
+  char *buf;
+  char *ptr;
+  int start=0;
+  int end=20;
+  size = pathconf(".", _PC_PATH_MAX);
 
+//give current directory path
+  if ((buf = (char *)malloc((size_t)size)) != NULL)
+     ptr = getcwd(buf, (size_t)size);
 
-if ((buf = (char *)malloc((size_t)size)) != NULL)
-    ptr = getcwd(buf, (size_t)size);
+//list the content of directory upto some limit
+  vector<string>s;
+  s=list_dir(ptr);
+  int k=s.size();
+  int count=min(k,end);
+  display_dir(s,start,end);
+  //pushing the current directory in backward stack
+  struct stat sb;  
+  string z=ptr;
+  char path[512];
+  bacw.push(z);
 
-
-vector<string>s;
-     s=list_dir(ptr);
-     int k=s.size();
-     int count=min(k,end);
-     display_dir(s,start,end);
-  
-    struct stat sb;  
-     string z=ptr;
-     char path[512];
-     bacw.push(z);
-
-     int c;
-     // char c[1];
-    while (1) 
-    {  //cout<<"hello"<<endl;
+  int c;
+ // changing mode and also taking user input key and perform different task
+  while (1) 
+    {  
         c = kbget();
-        if ( c == KEY_ESCAPE ) 
+        if ( c == KEY_ESCAPE ) // to exit from normal mode
         {
             break;
         }
-        else if(c == KEY_ENTER)
+        else if(c == KEY_ENTER)// to get into particular directory or to open a file
         {
            strcpy(path,s[count].c_str());
           
@@ -693,16 +738,17 @@ vector<string>s;
         	 	    forw.pop();
         	      }
 				 printf("\033[2J");
-        	 printf("\033[0;0H");
+             	 printf("\033[0;0H");
 				 s=list_dir(path);
 				 k=s.size();
 				 start=0;
 				 end=20;
 				 count=min(k,end);
 				 display_dir(s,start,end);   	
-				}  	
-        } else
-        if (c == KEY_RIGHT) 
+			    }  	
+        }
+         else
+        if (c == KEY_RIGHT) //for go forward
         {
             if(forw.size()>=1)
             {
@@ -720,8 +766,8 @@ vector<string>s;
             }
 
         } else
-        if (c == KEY_LEFT)
-         {
+        if (c == KEY_LEFT)//for go backward
+        {
             if(bacw.size()>=2)
             {
             	forw.push(bacw.top());
@@ -737,18 +783,18 @@ vector<string>s;
         	    display_dir(s,start,end);
             }
         }
-          else if(c==KEY_UP)
-          {
+        else if(c==KEY_UP) //for positioning cursor upward
+        {
              count--;
             cursorupward(1);
-          } 
-        else if(c==KEY_DOWN)
-          {
+        } 
+        else if(c==KEY_DOWN) // for postioning cursor downward
+        {
         	count++;
         	cursordownward(1);
-          }
-        else if(c==KEY_k)
-          {
+        }
+        else if(c==KEY_k) // for scrolling upward
+        {
         	if(start>0)
         	{
         		printf("\033[2J");
@@ -758,9 +804,9 @@ vector<string>s;
         		count=end;
         		display_dir(s,start,end);
             }
-          }
-        else if(c==KEY_l)
-          {
+        }
+        else if(c==KEY_l) // for scrolling downward
+        {
         	if(end<k)
         	{
         		printf("\033[2J");
@@ -770,7 +816,7 @@ vector<string>s;
                 count=end;
                 display_dir(s,start,end);
         	}
-          }
+        }
         else if(c==104)
         { // for home key(h)
             z=ptr;
@@ -813,23 +859,24 @@ vector<string>s;
 
             }
         }
-        else if(c==58){// command mode (:)
+        else if(c==58)
+        { // command mode (:)
               printf("\033[2J");
-        printf("\033[0;0H");
-        printf(":");
+              printf("\033[0;0H");
+              printf(":");
               command_mode();
-             strcpy(path,z.c_str());
-        	    s=list_dir(path);
-        	    k=s.size();
-        	    start=0;end=20;
-        	    count=min(k,end);
-        	    display_dir(s,start,end);
+              strcpy(path,z.c_str());
+        	  s=list_dir(path);
+        	  k=s.size();
+        	  start=0;end=20;
+        	  count=min(k,end);
+        	  display_dir(s,start,end);
         }
         else {
             putchar(c);
              }
-           //  memset(c,1,0);
     }
     printf("\n");
-    //return 0;
 }
+
+
